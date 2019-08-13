@@ -9,6 +9,8 @@
 
     <converters:TextFieldHintVisibilityConverter x:Key="TextFieldHintVisibilityConverter" />
     <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <converters:TextFieldClearButtonVisibilityConverter x:Key="ClearTextConverter" />
+    <converters:NotConverter x:Key="NotConverter" />
 
     <Style x:Key="MaterialDesignTextBoxBase" TargetType="{x:Type TextBoxBase}">
         <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"/>
@@ -21,6 +23,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Bottom"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="KeyboardNavigation.TabNavigation" Value="Local"/>
         <Setter Property="AllowDrop" Value="true"/>
         <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
         <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
@@ -103,6 +106,10 @@
                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                           MinWidth="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
                                         <ScrollViewer x:Name="PART_ContentHost" Focusable="false"
                                                       HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
                                                       SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
@@ -118,6 +125,24 @@
                                                        FloatingScale="{Binding Path=(wpf:HintAssist.FloatingScale), RelativeSource={RelativeSource TemplatedParent}}"
                                                        FloatingOffset="{Binding Path=(wpf:HintAssist.FloatingOffset), RelativeSource={RelativeSource TemplatedParent}}"                                               
                                                        />
+                                    <StackPanel Orientation="Horizontal" Grid.Column="1"  >
+                                        <TextBlock VerticalAlignment="Bottom"
+                                            FontSize="{TemplateBinding FontSize}"
+                                            Opacity="{Binding Path=(wpf:HintAssist.HintOpacity), RelativeSource={RelativeSource TemplatedParent}}"
+                                            Text="{Binding Path=(wpf:TextFieldAssist.SuffixText), RelativeSource={RelativeSource TemplatedParent}}"
+                                            />
+                                        <Button x:Name="PART_ClearButton" Height="Auto" Padding="2,0,0,0"
+                                            Style="{DynamicResource MaterialDesignToolButton}">
+                                            <Button.Visibility>
+                                                <MultiBinding Converter="{StaticResource ClearTextConverter}">
+                                                    <Binding ElementName="Hint" Path="IsContentNullOrEmpty" Converter="{StaticResource NotConverter}"/>
+                                                    <Binding Path="(wpf:TextFieldAssist.HasClearButton)" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                                </MultiBinding>
+                                            </Button.Visibility>
+                                            <wpf:PackIcon Margin="0"
+                                                  Kind="CloseCircle" />
+                                        </Button>
+                                    </StackPanel>
                                     </Grid>
                                 </Border>
                                 <Border x:Name="textFieldBoxBottomLine"
@@ -128,12 +153,17 @@
                                         VerticalAlignment="Bottom"
                                         SnapsToDevicePixels="True" />
                                 <Line x:Name="DashedLine" VerticalAlignment="Bottom" Visibility="Collapsed"
-                                      StrokeThickness="1.25" StrokeDashArray="1,2.5" StrokeDashCap="Round"
                                       X1="0" X2="{Binding ActualWidth, ElementName=border}" Y1="0" Y2="0" 
+                                      StrokeThickness="1.25" StrokeDashArray="1,2.5" StrokeDashCap="Round"
                                       Stroke="{TemplateBinding BorderBrush}" Opacity="0.56" />
                                 <wpf:Underline x:Name="Underline" Visibility="{Binding Path=(wpf:TextFieldAssist.DecorationVisibility), RelativeSource={RelativeSource TemplatedParent}}"
                                                CornerRadius="{Binding Path=(wpf:TextFieldAssist.UnderlineCornerRadius), RelativeSource={RelativeSource TemplatedParent}}"
                                                Background="{Binding Path=(wpf:TextFieldAssist.UnderlineBrush), RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Canvas VerticalAlignment="Bottom">
+                                <TextBlock Canvas.Top="2" FontSize="10" MaxWidth="{Binding ActualWidth, ElementName=border}"
+                                           Opacity="{Binding Path=(wpf:HintAssist.HintOpacity), RelativeSource={RelativeSource TemplatedParent}}"
+                                           Text="{Binding Path=(wpf:HintAssist.HelperText), RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Canvas>
                             </Grid>
                         </Border>
                     </Grid>
